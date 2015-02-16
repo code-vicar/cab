@@ -3,7 +3,7 @@ package com.pushmodo.gradle
 import org.gradle.api.*
 import org.apache.commons.lang3.SystemUtils
 
-class Mad implements Plugin<Project> {
+class Cab implements Plugin<Project> {
 	private final String windowsPrefix = 'cmd /c '
 	private final String unixPrefix = 'sh -c '
 	
@@ -13,7 +13,7 @@ class Mad implements Plugin<Project> {
 
 	private void run(cmd, cwd) {
 		cmd = prefix + cmd
-		println "**: ${cmd}"
+		println "cab: ${cmd}"
 		ProcessBuilder builder = new ProcessBuilder( cmd.split(' ') )
  		builder.directory(cwd)
 		builder.redirectErrorStream(true)
@@ -53,21 +53,21 @@ class Mad implements Plugin<Project> {
 		}
 		projectDir = project.projectDir
 		buildDir = project.buildDir
-		project.extensions.create('mad', MadExtension)
+		project.extensions.create('cab', CabExtension)
 
 		project.task('clean') << {
 			buildDir.deleteDir()
 		}
 
 		project.task('build') << {
-			createProject(project.mad.id, project.mad.title)
-			addPlatforms(project.mad.platforms)
-			addPlugins(project.mad.plugins)
+			createProject(project.cab.id, project.cab.title)
+			addPlatforms(project.cab.platforms)
+			addPlugins(project.cab.plugins)
 		}
 	}
 }
 
-class MadExtension {
+class CabExtension {
 	String id
 	String title
     ArrayList platforms
