@@ -1,11 +1,11 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
-group='com.github.code-vicar'
-version='1.0.4'
+group='com.pushmodo.gradle'
+version='1.0.5'
 
-sourceCompatibility = 1.8 // java 8
-targetCompatibility = 1.8
+sourceCompatibility = 1.7 // java 7
+targetCompatibility = 1.7
 
 repositories {
     mavenCentral()
