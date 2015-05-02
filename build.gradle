@@ -12,6 +12,7 @@ dependencies {
 }
 
 group='com.github.code-vicar'
+version='1.0.3'
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
