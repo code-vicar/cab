@@ -1,6 +1,12 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
+group='com.github.code-vicar'
+version='1.0.4'
+
+sourceCompatibility = 1.8 // java 8
+targetCompatibility = 1.8
+
 repositories {
     mavenCentral()
 }
@@ -10,9 +16,6 @@ dependencies {
     compile localGroovy()
     compile 'org.apache.commons:commons-lang3:3.0'
 }
-
-group='com.github.code-vicar'
-version='1.0.3'
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
