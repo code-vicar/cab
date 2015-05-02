@@ -7,22 +7,22 @@ import groovy.text.SimpleTemplateEngine
 class Cab implements Plugin<Project> {
 	private final String windowsPrefix = 'cmd /c '
 	private final String unixPrefix = 'sh -c '
-	
+
 	private String prefix
 	private Project project
-	
+
 	private void run(cmd, cwd) {
-		cmd = prefix + cmd
+		cmd = "${prefix} \"${cmd}\""
 		println "shell: ${cmd}"
 		ProcessBuilder builder = new ProcessBuilder( cmd.split(' ') )
  		builder.directory(cwd)
 		builder.redirectErrorStream(true)
-		 
+
 		Process process = builder.start()
-		 
+
 		InputStream stdout = process.getInputStream ()
 		BufferedReader reader = new BufferedReader (new InputStreamReader(stdout))
-		
+
 		def line
 		while ((line = reader.readLine ()) != null) {
 		   println "*: ${line}"
@@ -53,7 +53,7 @@ class Cab implements Plugin<Project> {
 		// delete www folder in cordova base project
 		def targetWWW = new File(project.buildDir, 'www')
 		def appDir = project.cab.appDir
-		
+
 		if (appDir == null) {
 			appDir = new File(project.projectDir, 'www')
 		}
@@ -99,7 +99,7 @@ class Cab implements Plugin<Project> {
 
 	void apply(Project project) {
 		this.project = project
-		
+
 		project.extensions.create('cab', CabExtension)
 
 		if (SystemUtils.IS_OS_WINDOWS) {
@@ -125,7 +125,7 @@ class Cab implements Plugin<Project> {
 		}
 
 		def copySourceTask = project.task('copySource') << {
-			copySource()	
+			copySource()
 		}
 
 		def copyConfigTask = project.task('copyConfig') << {
@@ -133,7 +133,7 @@ class Cab implements Plugin<Project> {
 		}
 
 		def buildTask = project.task('build') << {
-			//placeholder task	
+			//placeholder task
 		}
 
 		buildTask.dependsOn(addPluginsTask)
