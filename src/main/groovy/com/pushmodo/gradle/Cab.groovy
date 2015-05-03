@@ -5,28 +5,43 @@ import org.apache.commons.lang3.SystemUtils
 import groovy.text.SimpleTemplateEngine
 
 class Cab implements Plugin<Project> {
-	private final String windowsPrefix = 'cmd /c '
-	private final String unixPrefix = 'sh -c '
 
-	private String prefix
+  private String cordovaCmd
+
 	private Project project
 
+  private String[] prepareCmd(cmd) {
+    def _cmd = [cordovaCmd]
+    _cmd.addAll(cmd)
+    return _cmd as String[]
+  }
+
 	private void run(cmd, cwd) {
-		cmd = "${prefix} \"${cmd}\""
-		println "shell: ${cmd}"
-		ProcessBuilder builder = new ProcessBuilder( cmd.split(' ') )
- 		builder.directory(cwd)
-		builder.redirectErrorStream(true)
+    try {
+      def _cmd = prepareCmd(cmd)
+      println "shell: ${_cmd.toString()}"
+      ProcessBuilder builder = new ProcessBuilder(_cmd)
+      builder.directory(cwd)
+      builder.redirectErrorStream(true)
 
-		Process process = builder.start()
+      Process process = builder.start()
 
-		InputStream stdout = process.getInputStream ()
-		BufferedReader reader = new BufferedReader (new InputStreamReader(stdout))
+      InputStream stdout = process.getInputStream ()
+      BufferedReader reader = new BufferedReader (new InputStreamReader(stdout))
 
-		def line
-		while ((line = reader.readLine ()) != null) {
-		   println "*: ${line}"
-		}
+      def line
+      while ((line = reader.readLine ()) != null) {
+         println "*: ${line}"
+      }
+
+      process.waitFor()
+      if(process.exitValue() != 0) {
+          throw new GradleException("Error occurred running the command ${cmd}");
+      }
+    } catch (IOException e) {
+      println e
+      throw new GradleException("Error occurred running the command ${cmd}");
+    }
 	}
 
 	private void createProject() {
@@ -34,18 +49,18 @@ class Cab implements Plugin<Project> {
 		def buildDir = project.buildDir
 		def id = project.cab.id
 		def title = project.cab.title
-		run("cordova create ${buildDir.getPath()} ${id} ${title}", projectDir)
+		run(['create', "${buildDir.getPath()}", "${id}", "${title}"], projectDir)
 	}
 
 	private void addPlatforms() {
 		project.cab.platforms.each() {
-			run("cordova platform add ${it}", project.buildDir)
+			run(['platform', 'add', "${it}"], project.buildDir)
 		}
 	}
 
 	private void addPlugins() {
 		project.cab.plugins.each() {
-			run("cordova plugin add ${it}", project.buildDir)
+			run(['plugin', 'add', "${it}"], project.buildDir)
 		}
 	}
 
@@ -98,15 +113,10 @@ class Cab implements Plugin<Project> {
 	}
 
 	void apply(Project project) {
+    cordovaCmd = project.getRootDir().getPath() + "${File.separator}node_modules${File.separator}cordova${File.separator}bin${File.separator}" + (SystemUtils.IS_OS_WINDOWS ? 'cordova.cmd' : 'cordova');
 		this.project = project
 
 		project.extensions.create('cab', CabExtension)
-
-		if (SystemUtils.IS_OS_WINDOWS) {
-			prefix = windowsPrefix
-		} else {
-			prefix = unixPrefix
-		}
 
 		project.task('clean') << {
 			project.buildDir.deleteDir()
